@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, useRef } from "react";
 //import Dexie from 'dexie';
 import { toast } from "react-toastify";
@@ -10,11 +9,14 @@ import ClockButton from "./Reloj";
 import html2canvas from "html2canvas";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
+import BotonEliminarUnidad from "./BotonEliminarUnidad";
+
 const UnidadesComponent = () => {
   const [ruta, setRuta] = useState("");
   const [tipo, setTipo] = useState("");
   const [numeroUnidad, setNumeroUnidad] = useState("");
   const [isFormVisible, setFormVisible] = useState(false);
+  const [isFormVerdeVisible, setFormVerdeVisible] = useState(false);
   const [menuVisibleTalzintan, setMenuVisibleTalzintan] = useState(false);
   const [menuVisibleLoma, setMenuVisibleLoma] = useState(false);
   const [menuVisibleTezotepec, setMenuVisibleTezotepec] = useState(false);
@@ -60,6 +62,12 @@ const UnidadesComponent = () => {
   const [numerosOtra, setnumerosOtra] = useState([]);
   const [mostrarListaOtra, setMostrarListaOtra] = useState(false);
 
+  const [numerosAyotzingo, setnumerosAyotzingo] = useState([]);
+  const [mostrarListaAyotzingo, setMostrarListaAyotzingo] = useState(false);
+
+  const [numerosSeccion23, setnumerosSeccion23] = useState([]);
+  const [mostrarListaSeccion23, setMostrarListaSeccion23] = useState(false);
+
   // Estados para todas las unidades
   const [ultimaUnidadTalzintan, setUltimaUnidadTalzintan] = useState(null);
   const [penultimaUnidadTalzintan, setPenultimaUnidadTalzintan] =
@@ -97,6 +105,14 @@ const UnidadesComponent = () => {
   const [penultimaUnidadQuinta, setPenultimaUnidadQuinta] = useState(null);
   const [ultimaUnidadOtra, setUltimaUnidadOtra] = useState(null);
   const [penultimaUnidadOtra, setPenultimaUnidadOtra] = useState(null);
+
+  const [ultimaUnidadAyotzingo, setUltimaUnidadAyotzingo] = useState(null);
+  const [penultimaUnidadAyotzingo, setPenultimaUnidadAyotzingo] =
+    useState(null);
+
+  const [ultimaUnidadSeccion23, setUltimaUnidadSeccion23] = useState(null);
+  const [penultimaUnidadSeccion23, setPenultimaUnidadSeccion23] =
+    useState(null);
 
   // Estados para unidades de tipo rojo ROJO ROJO ROJO
   const [ultimaUnidadRojaTalzintan, setUltimaUnidadRojaTalzintan] =
@@ -146,6 +162,12 @@ const UnidadesComponent = () => {
   const [tiempoTranscurridoQuinta, setTiempoTranscurridoQuinta] = useState(0);
   const [tiempoTranscurridoOtra, setTiempoTranscurridoOtra] = useState(0);
 
+  const [tiempoTranscurridoAyotzingo, setTiempoTranscurridoAyotzingo] =
+    useState(0);
+
+  const [tiempoTranscurridoSeccion23, setTiempoTranscurridoSeccion23] =
+    useState(0);
+
   // Estados para tiempos transcurridos ROJOS ROJOS ROJOS
   const [tiempoTranscurridoRojaTalzintan, setTiempoTranscurridoRojaTalzintan] =
     useState(0);
@@ -176,6 +198,9 @@ const UnidadesComponent = () => {
   const [diferenciaQuinta, setDiferenciaQuinta] = useState(0);
   const [diferenciaOtra, setDiferenciaOtra] = useState(0);
 
+  const [diferenciaAyotzingo, setDiferenciaAyotzingo] = useState(0);
+  const [diferenciaSeccion23, setDiferenciaSeccion23] = useState(0);
+
   // Estados para diferencias de tiempo entre último y penúltimo registro ROJOS ROJOS ROJOS
   const [diferenciaRojaTalzintan, setDiferenciaRojaTalzintan] = useState(0);
   const [diferenciaRojaTezotepec, setDiferenciaRojaTezotepec] = useState(0);
@@ -186,7 +211,7 @@ const UnidadesComponent = () => {
   const [horaRegistro, setHoraRegistro] = useState(new Date().toISOString());
   const [isEditable, setIsEditable] = useState(false);
   const [isHoraVisible, setIsHoraVisible] = useState(false);
-  // eslint-disable-next-line no-unused-vars
+
   const [color, setColor] = useState("#FFFFFF");
 
   const tablaTalzintanRef = useRef(null);
@@ -207,6 +232,9 @@ const UnidadesComponent = () => {
   const tablaYopiRef = useRef(null);
   const tablaOtraRef = useRef(null);
 
+  const tablaAyotzingoRef = useRef(null);
+  const tablaSeccion23Ref = useRef(null);
+
   useEffect(() => {
     const actualizarCronometros = async () => {
       const unidadesTalzintan = await obtenerUnidades("talzintan");
@@ -223,6 +251,9 @@ const UnidadesComponent = () => {
       const unidadesTequimila = await obtenerUnidades("tequimila");
       const unidadesQuinta = await obtenerUnidades("quinta");
       const unidadesOtra = await obtenerUnidades("otra");
+
+      const unidadesAyotzingo = await obtenerUnidades("ayotzingo");
+      const unidadesSeccion23 = await obtenerUnidades("seccion23");
 
       const unidadesRojaTalzintan = await obtenerUnidades("talzintan", "rojo");
       const unidadesRojaTezotepec = await obtenerUnidades("tezotepec", "rojo");
@@ -331,6 +362,22 @@ const UnidadesComponent = () => {
         setPenultimaUnidadOtra,
         setTiempoTranscurridoOtra,
         setDiferenciaOtra
+      );
+
+      actualizarEstadoUnidades(
+        unidadesAyotzingo,
+        setUltimaUnidadAyotzingo,
+        setPenultimaUnidadAyotzingo,
+        setTiempoTranscurridoAyotzingo,
+        setDiferenciaAyotzingo
+      );
+
+      actualizarEstadoUnidades(
+        unidadesSeccion23,
+        setUltimaUnidadSeccion23,
+        setPenultimaUnidadSeccion23,
+        setTiempoTranscurridoSeccion23,
+        setDiferenciaSeccion23
       );
 
       // Unidades de tipo rojo
@@ -530,6 +577,37 @@ const UnidadesComponent = () => {
   };
 
   const agregarUnidad = async () => {
+    if (ruta && tipo && numeroUnidad.trim() !== "") {
+      const unidadValida = /^[0-9.\-+]+$/.test(numeroUnidad);
+      if (!unidadValida) {
+        alert(
+          "La unidad solo puede contener números, puntos, guiones o signos de más."
+        );
+        return;
+      }
+
+      await db.unidades.add({
+        ruta,
+        tipo,
+        numeroUnidad: numeroUnidad.trim(), // Guardado como string
+        horaRegistro,
+        color,
+      });
+
+      setRuta("");
+      setTipo("");
+      setNumeroUnidad("");
+      setHoraRegistro(new Date().toISOString());
+      setFormVisible(false); // Ocultar el formulario después de agregar la unidad
+    }
+  };
+
+  const handleAgregarTipo = (tipo) => {
+    setTipo(tipo);
+    agregarUnidad();
+  };
+
+  const agregarUnidadVerde = async () => {
     if (ruta && tipo && numeroUnidad) {
       const numeroUnidadNumerico = parseInt(numeroUnidad, 10);
       if (isNaN(numeroUnidadNumerico)) {
@@ -547,13 +625,13 @@ const UnidadesComponent = () => {
       setTipo("");
       setNumeroUnidad("");
       setHoraRegistro(new Date().toISOString());
-      setFormVisible(false); // Ocultar el formulario después de agregar la unidad
+      setFormVerdeVisible(false); // Ocultar el formulario después de agregar la unidad
     }
   };
 
-  const handleAgregarTipo = (tipo) => {
+  const handleAgregarTipoVerde = (tipo) => {
     setTipo(tipo);
-    agregarUnidad();
+    agregarUnidadVerde();
   };
 
   const handleCancelar = () => {
@@ -562,6 +640,14 @@ const UnidadesComponent = () => {
     setNumeroUnidad("");
     setHoraRegistro(new Date().toISOString());
     setFormVisible(false); // Ocultar el formulario al cancelar
+  };
+
+  const handleCancelarVerde = () => {
+    setRuta("");
+    setTipo("");
+    setNumeroUnidad("");
+    setHoraRegistro(new Date().toISOString());
+    setFormVerdeVisible(false); // Ocultar el formulario al cancelar
   };
 
   const handleEditHora = () => {
@@ -577,6 +663,15 @@ const UnidadesComponent = () => {
       inputRef.current.focus();
     }
   }, [isFormVisible]);
+
+  useEffect(() => {
+    if (isFormVerdeVisible) {
+      setHoraRegistro(new Date().toISOString());
+      setIsEditable(false);
+      setIsHoraVisible(false);
+      inputRef.current.focus();
+    }
+  }, [isFormVerdeVisible]);
 
   const formatoTiempo = (segundos) => {
     const minutos = Math.floor(segundos / 60);
@@ -778,6 +873,26 @@ const UnidadesComponent = () => {
 
   const handleCloseListaOtra = () => {
     setMostrarListaOtra(false);
+  };
+
+  const handleObtenerUnidadesAyotzingo = async () => {
+    const numerosAyotzingo = await obtenerUnidades("ayotzingo");
+    setnumerosAyotzingo(numerosAyotzingo);
+    setMostrarListaAyotzingo(true);
+  };
+
+  const handleCloseListaAyotzingo = () => {
+    setMostrarListaAyotzingo(false);
+  };
+
+  const handleObtenerUnidadesSeccion23 = async () => {
+    const numerosSeccion23 = await obtenerUnidades("seccion23");
+    setnumerosSeccion23(numerosSeccion23);
+    setMostrarListaSeccion23(true);
+  };
+
+  const handleCloseListaSeccion23 = () => {
+    setMostrarListaSeccion23(false);
   };
 
   const formatHoraRegistro = (horaRegistro) => {
@@ -1757,6 +1872,118 @@ const UnidadesComponent = () => {
     });
   };
 
+  const handleDownloadImageAyotzingo = () => {
+    const input = tablaAyotzingoRef.current;
+    const currentDate = new Date(); // Obtener la fecha y hora actual
+    const days = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ]; // Obtener los nombres de los días y meses en español
+    const months = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+    // Función para convertir la hora de formato 24 horas a formato de 12 horas
+    const get12HourFormat = (hour) => {
+      return hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    };
+    // Formatear la fecha y hora actual en el formato deseado
+    const dayOfWeek = days[currentDate.getDay()];
+    const dayOfMonth = currentDate.getDate();
+    const month = months[currentDate.getMonth()];
+    const year = currentDate.getFullYear();
+    const hours = get12HourFormat(currentDate.getHours());
+    const minutesWithLeadingZero = currentDate
+      .getMinutes()
+      .toString()
+      .padStart(2, "0");
+
+    const amOrPm = currentDate.getHours() >= 12 ? "pm" : "am";
+    const formattedDate = `Tabla ayotzingo ${dayOfWeek} ${dayOfMonth} de ${month} de ${year} a las ${hours}.${minutesWithLeadingZero} ${amOrPm}`;
+
+    // Guardar el IMAGEN con el nombre de archivo formateado
+    const filename = `${formattedDate}`;
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = filename + ".png";
+      link.href = imgData;
+      link.click();
+    });
+  };
+
+  const handleDownloadImageSeccion23 = () => {
+    const input = tablaSeccion23Ref.current;
+    const currentDate = new Date(); // Obtener la fecha y hora actual
+    const days = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ]; // Obtener los nombres de los días y meses en español
+    const months = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+    // Función para convertir la hora de formato 24 horas a formato de 12 horas
+    const get12HourFormat = (hour) => {
+      return hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    };
+    // Formatear la fecha y hora actual en el formato deseado
+    const dayOfWeek = days[currentDate.getDay()];
+    const dayOfMonth = currentDate.getDate();
+    const month = months[currentDate.getMonth()];
+    const year = currentDate.getFullYear();
+    const hours = get12HourFormat(currentDate.getHours());
+    const minutesWithLeadingZero = currentDate
+      .getMinutes()
+      .toString()
+      .padStart(2, "0");
+
+    const amOrPm = currentDate.getHours() >= 12 ? "pm" : "am";
+    const formattedDate = `Tabla seccion 23 ${dayOfWeek} ${dayOfMonth} de ${month} de ${year} a las ${hours}.${minutesWithLeadingZero} ${amOrPm}`;
+
+    // Guardar el IMAGEN con el nombre de archivo formateado
+    const filename = `${formattedDate}`;
+
+    html2canvas(input).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = filename + ".png";
+      link.href = imgData;
+      link.click();
+    });
+  };
+
   const add46Minutes = (horaRegistro) => {
     const date = new Date(horaRegistro);
     date.setMinutes(date.getMinutes() + 46);
@@ -2275,12 +2502,12 @@ const UnidadesComponent = () => {
                 <label>
                   <input
                     className="styled-input"
-                    type="number"
+                    type="text" // Cambiado de "number" a "text"
                     ref={inputRef}
                     value={numeroUnidad}
                     onChange={(e) => setNumeroUnidad(e.target.value)}
-                    inputMode="numeric"
-                    pattern="\d*"
+                    inputMode="numeric" // Esto sigue activando teclado numérico en móviles
+                    pattern="[0-9.\-+]*" // Expresión regular para permitir números, punto, guion y más
                   />
                 </label>
               </div>
@@ -2297,7 +2524,7 @@ const UnidadesComponent = () => {
                     "calanorte",
                     "pajaco",
                     "analco",
-                    // "yopi",
+                    "ayotzingo",
                   ].includes(ruta)}
                 >
                   Rojo
@@ -2342,6 +2569,94 @@ const UnidadesComponent = () => {
           </div>
         </div>
       )}
+
+      {/*FORMULARIO VERDE FORMULARIO VERDE FORMULARIO VERDE FORMULARIO VERDE FORMULARIO VERDE FORMULARIO VERDE*/}
+      {isFormVerdeVisible && (
+        <div>
+          <div className="form-container">
+            <ClockButton></ClockButton>
+            <div className="ruta-display" style={{ backgroundColor: color }}>
+              {ruta}
+            </div>
+            <form
+              className="add-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                agregarUnidadVerde();
+              }}
+            >
+              <div className="form-buttons">
+                <label>
+                  <input
+                    className="styled-input"
+                    type="number"
+                    ref={inputRef}
+                    value={numeroUnidad}
+                    onChange={(e) => setNumeroUnidad(e.target.value)}
+                    inputMode="numeric"
+                    pattern="\d*"
+                  />
+                </label>
+              </div>
+
+              <div className="form-buttons">
+                <button
+                  className="save-button-verde"
+                  type="button"
+                  onClick={() => handleAgregarTipoVerde("verde")}
+                  disabled={[
+                    "loma",
+                    "tequimila",
+                    "quinta",
+                    "calanorte",
+                    "pajaco",
+                    "analco",
+                    "ayotzingo",
+                  ].includes(ruta)}
+                >
+                  U-V
+                </button>
+                <button
+                  className="cancel-button"
+                  type="button"
+                  onClick={handleCancelarVerde}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="save-button-r1"
+                  type="button"
+                  onClick={() => handleAgregarTipoVerde("blanco")}
+                  // disabled={["tacopan"].includes(ruta)}
+                >
+                  R-1
+                </button>
+              </div>
+
+              <div className="hora-registro-container">
+                <label></label>
+                {isHoraVisible && (
+                  <input
+                    className="custom-datetime-input"
+                    type="datetime-local"
+                    value={convertToLocalDateTime(horaRegistro)}
+                    onChange={(e) => setHoraRegistro(e.target.value)}
+                    disabled={!isEditable}
+                  />
+                )}
+                <button
+                  className="boton-editar-hora"
+                  type="button"
+                  onClick={handleEditHora}
+                >
+                  Editar Hora
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Menú */}
       {menuVisibleTalzintan && (
         <div
@@ -2779,7 +3094,6 @@ const UnidadesComponent = () => {
 
           {/*FILA TALZINTAN  FILA TALZINTAN  FILA TALZINTAN  FILA TALZINTAN  FILA TALZINTAN  FILA TALZINTAN  */}
           <tr>
-            <td></td>
             <td className="celda-talzintan">
               <button
                 className="boton-cronometro"
@@ -2821,6 +3135,7 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadTalzintan.numeroUnidad}
                     </button>
+                    <BotonEliminarUnidad ruta="talzintan" />
                     <br></br>
                     {ultimaUnidadRojaTalzintan && (
                       <>
@@ -2851,7 +3166,6 @@ const UnidadesComponent = () => {
 
           {/*FILA LOMA  FILA LOMA  FILA LOMA  FILA LOMA  FILA LOMA  FILA LOMA  FILA LOMA  FILA LOMA   */}
           <tr>
-            <td></td>
             <td className="celda-loma">
               <button
                 className="boton-cronometro"
@@ -2867,7 +3181,6 @@ const UnidadesComponent = () => {
             </td>
             {ultimaUnidadLoma && (
               <td className="celda-loma">
-                {" "}
                 <button
                   onClick={() => setMenuVisibleLoma(!menuVisibleLoma)}
                   className={`${
@@ -2875,7 +3188,7 @@ const UnidadesComponent = () => {
                   }`}
                 >
                   {ultimaUnidadLoma.numeroUnidad}
-                </button>{" "}
+                </button>
                 {penultimaUnidadLoma && (
                   <>
                     <button className="button-se-lleva-loma">
@@ -2893,13 +3206,13 @@ const UnidadesComponent = () => {
                     </button>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="loma" />
               </td>
             )}
           </tr>
 
           {/*FILA TEZOTEPEC  FILA TEZOTEPEC  FILA TEZOTEPEC  FILA TEZOTEPEC  FILA TEZOTEPEC  FILA TEZOTEPEC  */}
           <tr>
-            <td></td>
             <td className="celda-tezotepec">
               <button
                 className="boton-cronometro"
@@ -2943,6 +3256,7 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadTezotepec.numeroUnidad}
                     </button>
+                    <BotonEliminarUnidad ruta="tezotepec" />
                     <br></br>
                     {ultimaUnidadRojaTezotepec && (
                       <>
@@ -2973,7 +3287,6 @@ const UnidadesComponent = () => {
 
           {/*FILA CALICAPAN FILA CALICAPAN FILA CALICAPAN FILA CALICAPAN FILA CALICAPAN FILA CALICAPAN FILA CALICAPAN*/}
           <tr>
-            <td></td>
             <td className="celda-calicapan">
               <button
                 className="boton-cronometro"
@@ -3014,6 +3327,7 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadCalicapan.numeroUnidad}
                     </button>
+                    <BotonEliminarUnidad ruta="calicapan" />
                     <br></br>
                     {ultimaUnidadRojaCalicapan && (
                       <>
@@ -3044,7 +3358,6 @@ const UnidadesComponent = () => {
 
           {/*FILA SOSA ESCUELA  FILA SOSA ESCUELA  FILA SOSA ESCUELA  FILA SOSA ESCUELA  FILA SOSA ESCUELA  */}
           <tr>
-            <td></td>
             <td className="celda-sosa">
               <button
                 className="boton-cronometro"
@@ -3090,6 +3403,7 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadSosaEscuela.numeroUnidad}
                     </button>
+                    <BotonEliminarUnidad ruta="sosa escuela" />
                     <br></br>
                     {ultimaUnidadRojaSosaEscuela && (
                       <>
@@ -3120,7 +3434,6 @@ const UnidadesComponent = () => {
 
           {/*FILA SAN ISIDRO  FILA SAN ISIDRO  FILA SAN ISIDRO  FILA SAN ISIDRO  FILA SAN ISIDRO    */}
           <tr>
-            <td></td>
             <td className="celda-sanisidro">
               <button
                 className="boton-cronometro"
@@ -3164,6 +3477,7 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadSanIsidro.numeroUnidad}
                     </button>
+                    <BotonEliminarUnidad ruta="san isidro" />
                     <br></br>
                     {ultimaUnidadRojaSanIsidro && (
                       <>
@@ -3194,7 +3508,6 @@ const UnidadesComponent = () => {
 
           {/*FILA TACOPAN  FILA TACOPAN  FILA TACOPAN  FILA TACOPAN  FILA TACOPAN  FILA TACOPAN  */}
           <tr>
-            <td></td>
             <td className="celda-tacopan">
               <button
                 className="boton-cronometro"
@@ -3238,16 +3551,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadTacopan.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="tacopan" />
               </td>
             )}
           </tr>
 
           {/*FILA TEQUIMILA  FILA TEQUIMILA  FILA TEQUIMILA  FILA TEQUIMILA  FILA TEQUIMILA  */}
           <tr>
-            <td></td>
             <td className="celda-tequimila">
               <button
                 className="boton-cronometro"
@@ -3288,16 +3600,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadTequimila.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="tequimila" />
               </td>
             )}
           </tr>
 
           {/*FILA QUINTA  FILA QUINTA  FILA QUINTA  FILA QUINTA  FILA QUINTA  FILA QUINTA  */}
           <tr>
-            <td></td>
             <td className="celda-quinta">
               <button
                 className="boton-cronometro"
@@ -3336,16 +3647,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadQuinta.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="quinta" />
               </td>
             )}
           </tr>
 
           {/*FILA CALANORTE  FILA CALANORTE  FILA CALANORTE  FILA CALANORTE  FILA CALANORTE    */}
           <tr>
-            <td></td>
             <td className="celda-calanorte">
               <button
                 className="boton-cronometro"
@@ -3386,16 +3696,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadCalanorte.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="calanorte" />
               </td>
             )}
           </tr>
 
           {/*FILA PAJACO  FILA PAJACO  FILA PAJACO  FILA PAJACO  FILA PAJACO  FILA PAJACO  */}
           <tr>
-            <td></td>
             <td className="celda-pajaco">
               <button
                 className="boton-cronometro"
@@ -3434,16 +3743,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadPajaco.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="pajaco" />
               </td>
             )}
           </tr>
 
           {/*FILA ANALCO  FILA ANALCO  FILA ANALCO  FILA ANALCO  FILA ANALCO  FILA ANALCO  */}
           <tr>
-            <td></td>
             <td className="celda-analco">
               <button
                 className="boton-cronometro"
@@ -3482,16 +3790,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadAnalco.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="analco" />
               </td>
             )}
           </tr>
 
           {/*FILA YOPI  FILA YOPI  FILA YOPI  FILA YOPI  FILA YOPI  FILA YOPI  FILA YOPI  */}
           <tr>
-            <td></td>
             <td className="celda-yopi">
               <button
                 className="boton-cronometro"
@@ -3503,7 +3810,7 @@ const UnidadesComponent = () => {
               >
                 {formatoTiempo(tiempoTranscurridoYopi)}
               </button>
-              <br></br> <span className="texto-chico">Yopi / Yopi E.</span>
+              <br></br> <span className="texto-chico">Tepepan</span>
             </td>
             {ultimaUnidadYopi && (
               <td className="celda-yopi">
@@ -3530,16 +3837,15 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadYopi.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="yopi" />
               </td>
             )}
           </tr>
 
           {/*FILA OTRA  FILA OTRA  FILA OTRA  FILA OTRA  FILA OTRA  FILA OTRA  FILA OTRA  */}
           <tr>
-            <td></td>
             <td className="celda-otra">
               <button
                 className="boton-cronometro"
@@ -3578,9 +3884,107 @@ const UnidadesComponent = () => {
                     >
                       {penultimaUnidadOtra.numeroUnidad}
                     </button>
-                    <br></br>
                   </>
                 )}
+                <BotonEliminarUnidad ruta="otra" />
+              </td>
+            )}
+          </tr>
+
+          {/* FILA AYOTZINGO   FILA AYOTZINGO   FILA AYOTZINGO   FILA AYOTZINGO   FILA AYOTZINGO   FILA AYOTZINGO  */}
+          <tr>
+            <td className="celda-ayotzingo">
+              <button
+                className="boton-cronometro"
+                onClick={() => {
+                  setRuta("ayotzingo");
+                  setColor("#ffffff");
+                  setFormVisible(true);
+                }}
+              >
+                {formatoTiempo(tiempoTranscurridoAyotzingo)}
+              </button>
+              <br></br> <span className="texto-chico">Ayotzingo</span>
+            </td>
+            {ultimaUnidadAyotzingo && (
+              <td className="celda-ayotzingo">
+                {" "}
+                <button
+                  className={`${
+                    ultimaUnidadAyotzingo.tipo === "blanco"
+                      ? "white-bg"
+                      : "red-bg"
+                  }`}
+                >
+                  {ultimaUnidadAyotzingo.numeroUnidad}
+                </button>{" "}
+                {penultimaUnidadAyotzingo && (
+                  <>
+                    <button className="button-se-lleva-ayotzingo">
+                      {formatoTiempo(diferenciaAyotzingo)}
+                    </button>
+                    <button
+                      className={`${
+                        penultimaUnidadAyotzingo.tipo === "blanco"
+                          ? "white-bg"
+                          : "red-bg"
+                      }`}
+                      onClick={handleObtenerUnidadesAyotzingo}
+                    >
+                      {penultimaUnidadAyotzingo.numeroUnidad}
+                    </button>
+                  </>
+                )}
+                <BotonEliminarUnidad ruta="ayotzingo" />
+              </td>
+            )}
+          </tr>
+
+          {/* FILA SECCION 23 FILA SECCION 23 FILA SECCION 23 FILA SECCION 23 FILA SECCION 23 FILA SECCION 23 FILA SECCION 23 */}
+          <tr>
+            <td className="celda-seccion23">
+              <button
+                className="boton-cronometro"
+                onClick={() => {
+                  setRuta("seccion23");
+                  setColor("#c9ff00");
+                  setFormVerdeVisible(true);
+                }}
+              >
+                {formatoTiempo(tiempoTranscurridoSeccion23)}
+              </button>
+              <br></br> <span className="texto-chico">Seccion 23</span>
+            </td>
+            {ultimaUnidadSeccion23 && (
+              <td className="celda-seccion23">
+                {" "}
+                <button
+                  className={`${
+                    ultimaUnidadSeccion23.tipo === "blanco"
+                      ? "blue-bg"
+                      : "green-bg"
+                  }`}
+                >
+                  {ultimaUnidadSeccion23.numeroUnidad}
+                </button>{" "}
+                {penultimaUnidadSeccion23 && (
+                  <>
+                    <button className="button-se-lleva-seccion23">
+                      {formatoTiempo(diferenciaSeccion23)}
+                    </button>
+                    <button
+                      className={`${
+                        penultimaUnidadSeccion23.tipo === "blanco"
+                          ? "blue-bg"
+                          : "green-bg"
+                      }`}
+                      onClick={handleObtenerUnidadesSeccion23}
+                    >
+                      {penultimaUnidadSeccion23.numeroUnidad}
+                    </button>
+                  </>
+                )}
+                <BotonEliminarUnidad ruta="seccion23" />
               </td>
             )}
           </tr>
@@ -3941,7 +4345,7 @@ const UnidadesComponent = () => {
                     const numeroOrden = index + 1;
 
                     // Si el numeroOrden es 1, 2, 3, 8, 9, 10, no renderizar la fila
-                    if ([1, 2,3,4,5].includes(numeroOrden)) {
+                    if ([1, 2, 3, 4, 5].includes(numeroOrden)) {
                       return null; // No renderizar nada
                     }
 
@@ -3952,8 +4356,7 @@ const UnidadesComponent = () => {
                       buttonClass += " color-ocho"; // Clase específica para el 8
                     } else if (numeroOrden === 9) {
                       buttonClass += " color-nueve"; // Clase específica para el 9
-                    } else if (numeroOrden === 10
-                    ) {
+                    } else if (numeroOrden === 10) {
                       buttonClass += " color-diez"; // Clase específica para el 10
                     }
 
@@ -4007,7 +4410,9 @@ const UnidadesComponent = () => {
             <table className="lista-calicapan" ref={tablaCalicapanRef}>
               <thead>
                 <tr>
-                  <th colSpan={8} className="celda-calicapan">Informe: Calicapan</th>
+                  <th colSpan={8} className="celda-calicapan">
+                    Informe: Calicapan
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -4185,7 +4590,10 @@ const UnidadesComponent = () => {
                 )}
               </tbody>
             </table>
-            <button className="capturar-button-sosa" onClick={handleDownloadImageSosa}>
+            <button
+              className="capturar-button-sosa"
+              onClick={handleDownloadImageSosa}
+            >
               📸 Capturar
             </button>
           </div>
@@ -4388,9 +4796,7 @@ const UnidadesComponent = () => {
                     const numeroOrden = index + 1;
 
                     // Si el numeroOrden es 1, 2, 3, 5, 6, 7, no renderizar la fila
-                    if (
-                      [1, 2, 3, 14, 15].includes(numeroOrden)
-                    ) {
+                    if ([1, 2, 3, 14, 15].includes(numeroOrden)) {
                       return null; // No renderizar nada
                     }
 
@@ -4875,6 +5281,102 @@ const UnidadesComponent = () => {
               </tbody>
             </table>
             <button className="close-button" onClick={handleDownloadImageOtra}>
+              📸 Capturar
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div>
+        {mostrarListaAyotzingo && (
+          <div className="floating-list-ayotzingo">
+            <button
+              className="close-button-ayotzingo"
+              onClick={handleCloseListaAyotzingo}
+            >
+              ❌ Cerrar Ayotzingo
+            </button>
+            <table className="lista-ayotzingo" ref={tablaAyotzingoRef}>
+              <thead>
+                <tr>
+                  <th colSpan={3}>Ayotzingo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {numerosAyotzingo
+                  .slice()
+                  .reverse()
+                  .map((unidad, index) => (
+                    <tr key={index}>
+                      <td className="celda-ayotzingo">{index + 1}</td>
+                      <td className="celda-ayotzingo">
+                        <button
+                          className={`unidad-button ${
+                            unidad.tipo === "rojo" ? "rojo" : ""
+                          }`}
+                        >
+                          {unidad.numeroUnidad}
+                        </button>
+                      </td>
+                      <td className="celda-ayotzingo">
+                        {formatHoraRegistro(unidad.horaRegistro)}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            <button
+              className="close-button"
+              onClick={handleDownloadImageAyotzingo}
+            >
+              📸 Capturar
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div>
+        {mostrarListaSeccion23 && (
+          <div className="floating-list-seccion23">
+            <button
+              className="close-button-seccion23"
+              onClick={handleCloseListaSeccion23}
+            >
+              ❌ Cerrar Seccion 23
+            </button>
+            <table className="lista-seccion23" ref={tablaSeccion23Ref}>
+              <thead>
+                <tr>
+                  <th colSpan={3}>Seccion 23</th>
+                </tr>
+              </thead>
+              <tbody>
+                {numerosSeccion23
+                  .slice()
+                  .reverse()
+                  .map((unidad, index) => (
+                    <tr key={index}>
+                      <td className="celda-seccion23">{index + 1}</td>
+                      <td className="celda-seccion23">
+                        <button
+                          className={`unidad-button ${
+                            unidad.tipo === "verde" ? "verde" : ""
+                          }`}
+                        >
+                          {unidad.numeroUnidad}
+                        </button>
+                      </td>
+                      <td className="celda-seccion23">
+                        {formatHoraRegistro(unidad.horaRegistro)}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            <button
+              className="close-button"
+              onClick={handleDownloadImageSeccion23}
+            >
               📸 Capturar
             </button>
           </div>

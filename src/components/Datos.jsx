@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React from "react";
 //import db from "../db";
 import { toast } from "react-toastify";
@@ -19,9 +18,9 @@ function Datos() {
     );
     if (confirmed) {
       try {
-        await Dexie.delete("UnidadesDB"); // Elimina la base de datos
+        await Dexie.delete("LilithUnidadesDB"); // Elimina la base de datos
         // Vuelve a inicializar la base de datos
-        const newDb = new Dexie("UnidadesDB");
+        const newDb = new Dexie("LilithUnidadesDB");
         newDb.version(1).stores({
           unidades: "++id,ruta,tipo,numeroUnidad,horaRegistro",
         });
