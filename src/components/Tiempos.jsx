@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 //import Dexie from 'dexie';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Tiempos.css"; // Asegúrate de tener el archivo CSS para los estilos
 import db from "../db";
+import { dbpila } from "./dbpila"; // importa la DB
 import ClockButton from "./Reloj";
 
 import html2canvas from "html2canvas";
@@ -213,6 +215,8 @@ const UnidadesComponent = () => {
   const [isHoraVisible, setIsHoraVisible] = useState(false);
 
   const [color, setColor] = useState("#FFFFFF");
+
+  const [nuevoElemento, setNuevoElemento] = useState("");
 
   const tablaTalzintanRef = useRef(null);
   const tablaLomaRef = useRef(null);
@@ -2481,6 +2485,65 @@ const UnidadesComponent = () => {
     });
   };
 
+  // ✅ Reactividad automática
+  const pila = useLiveQuery(async () => {
+    const registros = await dbpila.pila.toArray();
+    return registros.map((r) => r.valor).reverse(); // más reciente primero
+  }, []);
+
+  // ✅ Agregar elemento a la pila
+  const agregarElemento = async (entrada) => {
+    const valor = entrada.trim().toLowerCase();
+    if (!valor || valor === "tacopan") return;
+
+    const registros = await dbpila.pila.toArray();
+    const valores = registros.map((r) => r.valor);
+
+    if (valor === "talzintan") {
+
+      // Filtrar registros que son "talzintan"
+      const talzintanRegistros = registros.filter(
+        (r) => r.valor === "talzintan"
+      );
+
+      if (talzintanRegistros.length >= 2) {
+        // ✅ Ordenar por ID ascendente (más viejo primero)
+        const masAntiguo = talzintanRegistros.sort((a, b) => a.id - b.id)[0];
+        await dbpila.pila.delete(masAntiguo.id);
+      }
+    } else {
+      const indexExistente = valores.indexOf(valor);
+      if (indexExistente !== -1) {
+        const idEliminar = registros[indexExistente].id;
+        await dbpila.pila.delete(idEliminar);
+      }
+    }
+
+    await dbpila.pila.add({ valor });
+  };
+
+  const limpiarPila = async () => {
+    await dbpila.pila.clear();
+    // No necesitas llamar a setPila() porque useLiveQuery actualiza automáticamente
+  };
+
+  const obtenerColor = (nombre) => {
+    switch (nombre) {
+      case "talzintan":
+        return "#4caf50"; // verde
+      case "tezotepec":
+        return "#ff9800"; // naranja
+      case "calicapan":
+        return "#2196f3"; // azul
+      case "sosa":
+        return "#e14eff"; // rosa
+      case "sani":
+        return "#9e9e9e"; // gris
+      default:
+        return "#000"; // negro para otros
+    }
+  };
+
   return (
     <div>
       {/*FORMULARIO FORMULARIO FORMULARIO FORMULARIO FORMULARIO FORMULARIO FORMULARIO FORMULARIO*/}
@@ -2515,8 +2578,11 @@ const UnidadesComponent = () => {
               <div className="form-buttons">
                 <button
                   className="save-button-rojo"
-                  type="button"
-                  onClick={() => handleAgregarTipo("rojo")}
+                  type="submit"
+                  onClick={() => {
+                    handleAgregarTipo("rojo");
+                    agregarElemento(nuevoElemento);
+                  }}
                   disabled={[
                     "loma",
                     "tequimila",
@@ -2531,14 +2597,14 @@ const UnidadesComponent = () => {
                 </button>
                 <button
                   className="cancel-button"
-                  type="button"
+                  type="submit"
                   onClick={handleCancelar}
                 >
                   Cancelar
                 </button>
                 <button
                   className="save-button-r3"
-                  type="button"
+                  type="submit"
                   onClick={() => handleAgregarTipo("blanco")}
                   // disabled={["tacopan"].includes(ruta)}
                 >
@@ -3084,11 +3150,46 @@ const UnidadesComponent = () => {
       <table>
         <tbody>
           <tr>
-            <td></td>
             <td>
               <CopyToClipboard text={textToCopyAmotac}>
                 <button className="amotac">Amotac</button>
               </CopyToClipboard>
+            </td>
+            <td>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                <button
+                  onClick={limpiarPila}
+                  style={{
+                    height: "36px", // o "2rem", o cualquier unidad válida
+                    marginTop: 2,
+                    backgroundColor: "red",
+                    color: "#fff",
+                    padding: "1px 2px",
+                    border: "none",
+                    borderRadius: 6,
+                  }}
+                >
+                  Limpiar
+                </button>
+                {pila?.map((el, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: "32px", // o "2rem", o cualquier unidad válida
+                      backgroundColor: obtenerColor(el),
+                      color: "#fff",
+                      padding: "1px 2px",
+                      minWidth: "22px",
+                      textAlign: "center",
+                      fontSize: "0.75rem",
+                      borderRadius: "8px",
+                    }}
+                    title={el}
+                  >
+                    {el.slice(0, 2)}
+                  </div>
+                ))}
+              </div>
             </td>
           </tr>
 
@@ -3100,6 +3201,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("talzintan");
                   setColor("#58ff66");
+                  setNuevoElemento("talzintan");
                   setFormVisible(true);
                 }}
               >
@@ -3219,6 +3321,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("tezotepec");
                   setColor("#eb9d36");
+                  setNuevoElemento("tezotepec");
                   setFormVisible(true);
                 }}
               >
@@ -3293,6 +3396,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("calicapan");
                   setColor("#00c3ff");
+                  setNuevoElemento("calicapan");
                   setFormVisible(true);
                 }}
               >
@@ -3364,6 +3468,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("sosa escuela");
                   setColor("#ea00ff");
+                  setNuevoElemento("sosa");
                   setFormVisible(true);
                 }}
               >
@@ -3440,6 +3545,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("san isidro");
                   setColor("#9c9c9c");
+                  setNuevoElemento("sani");
                   setFormVisible(true);
                 }}
               >
@@ -3514,6 +3620,7 @@ const UnidadesComponent = () => {
                 onClick={() => {
                   setRuta("tacopan");
                   setColor("#fffb00");
+                  setNuevoElemento("tacopan");
                   setFormVisible(true);
                 }}
               >

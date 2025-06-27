@@ -1,29 +1,36 @@
-import { Link } from 'react-router-dom';
-import "./Navbar.css"
+import { Link, useLocation } from 'react-router-dom';
+import "./Navbar.css";
 import {
-    faClock,
-    faDollar,
-    faReceipt,
+  faClock,
+  faDollarSign,
+  faInfoCircle,
+  faReceipt,
+  faTableList,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const navigationItems = [
   { path: '/', icon: faClock, label: 'Tiempos' },
-  { path: '/datos', icon: faClock, label: 'Datos' },
+  { path: '/datos', icon: faTableList, label: 'Datos' },
   { path: '/reporte', icon: faReceipt, label: 'Reporte' },
-  { path: '/comision', icon: faDollar, label: 'Comision' },
-
+  { path: '/comision', icon: faDollarSign, label: 'Comisión' },
+  { path: '/acerca', icon: faInfoCircle, label: 'Acerca' },
 ];
 
 function Navbar() {
+  const location = useLocation();
+
   return (
     <nav className="navbar">
       <ul className="navbar-nav">
         {navigationItems.map((item) => (
-          <li className="nav-item" key={item.path}>
+          <li
+            key={item.path}
+            className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+          >
             <Link to={item.path} className="nav-link">
-              <FontAwesomeIcon icon={item.icon} size="2x" style={{ fontSize: '24px' }}/> {/* Renderiza el icono de Font Awesome */}
-              <span className="text-small">{item.label}</span> {/* Agrega el span para mostrar la etiqueta */}
+              <FontAwesomeIcon icon={item.icon} className="nav-icon" />
+              <span className="nav-label">{item.label}</span>
             </Link>
           </li>
         ))}
